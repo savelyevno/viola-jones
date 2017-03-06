@@ -97,7 +97,9 @@ def test_model(model_path):
 
     N = tp + tn + fp + fn
 
-    print('accuracy: ')
+    print('accuracy: ', (tp + tn)/N)
+    print('type I error: ', fp/(fp + tn))
+    print('type II error: ', fn/(tp + fn))
 
 
 
