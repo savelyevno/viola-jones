@@ -12,6 +12,7 @@ def prepare_data(faces_data_file_name, not_face_data_file_name):
 
     X = np.vstack((faces, not_faces))
     y = np.hstack((np.ones(faces.shape[0]), -np.ones(not_faces.shape[0])))
+    w = np.hstack((np.ones(faces.shape[0])/faces.shape[0]/2, np.ones(not_faces.shape[0])/not_faces.shape[0]/2))
 
     np.random.seed(0)
     permutation = np.array([i for i in range(y.shape[0])])
@@ -21,33 +22,25 @@ def prepare_data(faces_data_file_name, not_face_data_file_name):
         pi = permutation[i]
         X[i], X[pi] = X[pi], X[i]
         y[i], y[pi] = y[pi], y[i]
+        w[i], w[pi] = w[pi], w[i]
 
-    return X, y
+    return X, y, w
 
 
 def train():
     timer.start()
     print('started preparing data')
-    X, y = prepare_data('features_full/train/face/data.npy', 'features_full/train/non-face/data.npy')
+    X, y, w = prepare_data('features_full/train/face/data.npy', 'features_full/train/non-face/data.npy')
     print('done preparing data', str(timer.stop()) + str('s'))
 
     ada_boost = AdaBoostClassifier()
     timer.start()
     print('started training')
-    ada_boost.fit(X, y)
+    ada_boost.fit(X, y, w)
     print('done training', str(timer.stop()) + str('s'))
 
-    with open('ada_boosts/params1.pickle', 'wb') as handle:
+    with open('ada_boosts/wighted.pickle', 'wb') as handle:
         pickle.dump(ada_boost, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-def get_score(model_path):
-    with open('ada_boosts/' + model_path, 'rb') as handle:
-        ada_boost = pickle.load(handle)
-
-    X, y = prepare_data('features_full/test/face/data.npy', 'features_full/test/non-face/data.npy')
-
-    print('score:', ada_boost.score(X, y))
 
 
 def test_model(model_path):
@@ -102,7 +95,5 @@ def test_model(model_path):
     print('type II error: ', fn/(tp + fn))
 
 
-
-# train()
-# get_score('params1.pickle')
-test_model('params1.pickle')
+train()
+# test_model('regular.pickle')
