@@ -120,8 +120,8 @@ def main():
         print(timer.stop())
 
     for subdir, dirs, files in os.walk(input_folder):
-        if 100 < len(files):
+        if 4500 < len(files) < 4600:
             process_folder(os.path.relpath(subdir, input_folder))
 
 
-main()
+# main()
